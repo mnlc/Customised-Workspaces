@@ -26,6 +26,7 @@
 
 // External imports
 const { GLib, Gio } = imports.gi;
+const { extensionUtils } = imports.misc;
 
 // Internal imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();
@@ -174,4 +175,39 @@ function readStream(stream, callback) {
             readStream(source, callback);
         }
     });
+}
+
+function _getSettingsPre30 (schema) {
+    const GioSSS = Gio.SettingsSchemaSource;
+
+    let schemaDir = Me.dir.get_child('schemas');
+
+    let schemaSource = GioSSS.get_default();
+    if (schemaDir.query_exists(null)) {
+        schemaSource = GioSSS.new_from_directory(
+            schemaDir.get_path(),
+            schemaSource,
+            false);
+    }
+
+    let schemaObj = schemaSource.lookup(schema, true);
+    if (!schemaObj) {
+        throw new Error(
+            'Schema ' + schema +
+            ' could not be found for extension ' +
+            Me.metadata.uuid
+        );
+    }
+    return new Gio.Settings({ settings_schema: schemaObj });
+}
+
+function loadSettings (schema) {
+    let _settingsObject
+    if (extensionUtils.getSettings) {
+        _settingsObject = extensionUtils.getSettings(schema);
+    } else {
+        _settingsObject = this._getSettingsPre30(schema);
+    }
+
+    return _settingsObject;
 }

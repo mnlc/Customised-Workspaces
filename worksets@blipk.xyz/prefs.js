@@ -30,10 +30,10 @@ const { extensionUtils } = imports.misc;
 
 // Internal imports
 const Me = extensionUtils.getCurrentExtension();
-const { dev } = Me.imports;
+const { dev, utils } = Me.imports;
 
 function init () {
-    Me.settings = extensionUtils.getSettings('org.gnome.shell.extensions.worksets');
+    Me.settings = utils.loadSettings('org.gnome.shell.extensions.worksets');
     Me.settings.set_boolean('show-panel-indicator', true);
 }
 
